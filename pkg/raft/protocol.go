@@ -12,6 +12,11 @@ type RPCMsg interface {
 	fmt.Stringer
 }
 
+type IncomingRPCMsg struct {
+	SourceId ServerId
+	Msg      RPCMsg
+}
+
 type RPCRequestVoteRequest struct {
 	Term         Term
 	CandidateId  ServerId

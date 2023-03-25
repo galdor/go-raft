@@ -48,6 +48,7 @@ func (s *Server) startHTTPServer() error {
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      5 * time.Second,
 		IdleTimeout:       60 * time.Second,
+		Handler:           s,
 	}
 
 	go func() {
@@ -160,4 +161,47 @@ func (s *Server) broadcastMsg(msg RPCMsg) {
 
 		s.sendMsg(id, msg)
 	}
+}
+
+func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	sourceId := req.Header.Get("X-Raft-Source-Id")
+	if sourceId == "" {
+		s.replyError(w, 400, "missing or empty X-Raft-Source-Id header field")
+		return
+	}
+
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.replyError(w, 500, "cannot read request body: %v", err)
+		return
+	}
+
+	msg, err := DecodeRPCMsg(data)
+	if err != nil {
+		s.replyError(w, 400, "invalid message: %v", err)
+		return
+	}
+
+	s.replyEmpty(w, 204)
+
+	incomingMsg := IncomingRPCMsg{
+		SourceId: ServerId(sourceId),
+		Msg:      msg,
+	}
+
+	s.rpcChan <- incomingMsg
+}
+
+func (s *Server) replyEmpty(w http.ResponseWriter, status int) {
+	w.WriteHeader(status)
+}
+
+func (s *Server) replyText(w http.ResponseWriter, status int, format string, args ...interface{}) {
+	w.WriteHeader(status)
+	fmt.Fprintf(w, format, args...)
+}
+
+func (s *Server) replyError(w http.ResponseWriter, status int, format string, args ...interface{}) {
+	s.Log.Error(format, args...)
+	s.replyText(w, status, format, args...)
 }

@@ -45,6 +45,8 @@ type Server struct {
 	httpServer *http.Server
 	httpClient *http.Client
 
+	rpcChan chan IncomingRPCMsg
+
 	errChan  chan<- error
 	stopChan chan struct{}
 	wg       sync.WaitGroup
@@ -80,6 +82,8 @@ func NewServer(cfg ServerCfg) (*Server, error) {
 		PublicAddress: sdata.PublicAddress,
 
 		persistentStore: persistentStore,
+
+		rpcChan: make(chan IncomingRPCMsg),
 
 		stopChan: make(chan struct{}),
 	}
@@ -141,6 +145,9 @@ func (s *Server) main() {
 		case <-s.stopChan:
 			s.shutdown()
 			return
+
+		case incomingMsg := <-s.rpcChan:
+			s.onRPCMsg(incomingMsg.SourceId, incomingMsg.Msg)
 		}
 	}
 }
@@ -149,4 +156,10 @@ func (s *Server) shutdown() {
 	s.stopHTTPServer()
 
 	s.persistentStore.Close()
+
+	close(s.rpcChan)
+}
+
+func (s *Server) onRPCMsg(sourceId ServerId, msg RPCMsg) {
+	s.Log.Debug(2, "received %v from %s", msg, sourceId)
 }
