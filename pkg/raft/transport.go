@@ -164,12 +164,14 @@ func (s *Server) broadcastMsg(msg RPCMsg) {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	// Obtain the identifier of the sender of the message
 	sourceId := req.Header.Get("X-Raft-Source-Id")
 	if sourceId == "" {
 		s.replyError(w, 400, "missing or empty X-Raft-Source-Id header field")
 		return
 	}
 
+	// Read and decode the message
 	data, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		s.replyError(w, 500, "cannot read request body: %v", err)
@@ -182,11 +184,20 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Send the response
 	s.replyEmpty(w, 204)
 
+	// Send the message to the main goroutine unless the server is being
+	// stopped.
 	incomingMsg := IncomingRPCMsg{
 		SourceId: ServerId(sourceId),
 		Msg:      msg,
+	}
+
+	select {
+	case <-s.stopChan:
+		return
+	default:
 	}
 
 	s.rpcChan <- incomingMsg

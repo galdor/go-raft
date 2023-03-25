@@ -6,6 +6,10 @@ import (
 	"runtime"
 )
 
+func Panicf(format string, args ...interface{}) {
+	panic(fmt.Sprintf(format, args...))
+}
+
 func RecoverValueString(value interface{}) (msg string) {
 	switch v := value.(type) {
 	case error:
