@@ -1,0 +1,18 @@
+{
+  "servers": {
+    "i1": {
+      "localAddress":  "127.0.42.1:8042",
+      "publicAddress": "127.0.42.1:8042"
+    },
+
+    "i2": {
+      "localAddress":  "127.0.42.2:8042",
+      "publicAddress": "127.0.42.2:8042"
+    },
+
+    "i3": {
+      "localAddress":  "127.0.42.3:8042",
+      "publicAddress": "127.0.42.3:8042"
+    }
+  }
+}
