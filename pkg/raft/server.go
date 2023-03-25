@@ -130,10 +130,6 @@ func (s *Server) Stop() {
 	close(s.stopChan)
 	s.wg.Wait()
 
-	s.stopHTTPServer()
-
-	s.persistentStore.Close()
-
 	s.Log.Info("stopped")
 }
 
@@ -150,4 +146,7 @@ func (s *Server) main() {
 }
 
 func (s *Server) shutdown() {
+	s.stopHTTPServer()
+
+	s.persistentStore.Close()
 }
