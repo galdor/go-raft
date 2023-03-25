@@ -30,7 +30,7 @@ func run(p *program.Program) {
 	if p.IsOptionSet("cfg") {
 		cfgPath := p.OptionValue("cfg")
 
-		p.Info("loading configuration from %s", cfgPath)
+		p.Info("loading configuration from %q", cfgPath)
 
 		if err := cfg.LoadFile(cfgPath); err != nil {
 			p.Fatal("cannot load configuration: %v", err)
@@ -38,28 +38,30 @@ func run(p *program.Program) {
 	}
 
 	id := raft.ServerId(p.ArgumentValue("id"))
-	if _, found := cfg.Servers[id]; !found {
-		p.Fatal("id %q not found in server set", id)
-	}
 
 	// Data directory
-	dataDirPath0 := p.OptionValue("data-dir")
-	dataDirPath := path.Join(dataDirPath0, fmt.Sprintf("kvstore-%s", id))
-	if err := os.MkdirAll(dataDirPath, 0700); err != nil {
-		p.Fatal("cannot create %s: %v", dataDirPath, err)
+	dataDir0 := p.OptionValue("data-dir")
+	dataDir := path.Join(dataDir0, fmt.Sprintf("kvstore-%s", id))
+	if err := os.MkdirAll(dataDir, 0700); err != nil {
+		p.Fatal("cannot create %s: %v", dataDir, err)
 	}
 
-	p.Info("using data directory %s", dataDirPath)
+	p.Info("using data directory %q", dataDir)
 
 	// Server
 	serverCfg := raft.ServerCfg{
 		Id:      id,
 		Servers: cfg.Servers,
 
+		DataDirectory: dataDir,
+
 		Logger: p,
 	}
 
-	server := raft.NewServer(serverCfg)
+	server, err := raft.NewServer(serverCfg)
+	if err != nil {
+		p.Fatal("cannot create server: %v", err)
+	}
 
 	// Main
 	errChan := make(chan error)
