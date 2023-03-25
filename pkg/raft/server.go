@@ -180,6 +180,17 @@ func (s *Server) Stop() {
 func (s *Server) main() {
 	defer s.wg.Done()
 
+	defer func() {
+		if value := recover(); value != nil {
+			msg := RecoverValueString(value)
+			trace := StackTrace(10)
+			s.Log.Error("panic: %s\n%s", msg, trace)
+
+			s.errChan <- fmt.Errorf("panic: %s", msg)
+			s.shutdown()
+		}
+	}()
+
 	for {
 		select {
 		case <-s.stopChan:
