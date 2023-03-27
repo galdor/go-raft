@@ -100,7 +100,8 @@ func NewServer(cfg ServerCfg) (*Server, error) {
 	persistentStorePath := path.Join(cfg.DataDirectory, "persistent-state.json")
 	persistentStore := NewPersistentStore(persistentStorePath)
 
-	logStore := NewLogStore()
+	logStorePath := path.Join(cfg.DataDirectory, "log.data")
+	logStore := NewLogStore(logStorePath)
 
 	s := &Server{
 		Cfg: cfg,
@@ -141,7 +142,7 @@ func (s *Server) Start(errChan chan<- error) error {
 		s.persistentState.CurrentTerm, s.persistentState.VotedFor)
 
 	// Log store
-	if err := s.logStore.Open(); err != nil {
+	if err := s.logStore.Open(nil); err != nil {
 		return fmt.Errorf("cannot open log store: %w", err)
 	}
 
