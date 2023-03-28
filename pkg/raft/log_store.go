@@ -68,13 +68,38 @@ func (s *LogStore) LastTerm() Term {
 	return s.lastTerm
 }
 
-func (s *LogStore) AppendEntry(entry LogEntry) error {
-	if err := s.writeEntry(s.file, entry); err != nil {
+func (s *LogStore) AppendEntries(entries []LogEntry) error {
+	off, err := s.file.Seek(0, os.SEEK_CUR)
+	if err != nil {
+		return fmt.Errorf("cannot seek %q: %w", s.filePath, err)
+	}
+
+	rewind := func(err error) error {
+		if _, seekErr := s.file.Seek(off, os.SEEK_SET); seekErr != nil {
+			return errors.Join(err,
+				fmt.Errorf("cannot seek %q: %w", s.filePath, seekErr))
+		}
+
+		if truncateErr := s.file.Truncate(off); truncateErr != nil {
+			return errors.Join(err,
+				fmt.Errorf("cannot truncate %q: %w", s.filePath, truncateErr))
+		}
+
 		return err
 	}
 
-	s.lastIndex++
-	s.lastTerm = entry.Term
+	for _, entry := range entries {
+		if err := s.writeEntry(s.file, entry); err != nil {
+			return rewind(err)
+		}
+
+		s.lastIndex++
+		s.lastTerm = entry.Term
+	}
+
+	if err := s.file.Sync(); err != nil {
+		return rewind(fmt.Errorf("cannot sync %q: %w", s.filePath, err))
+	}
 
 	return nil
 }
