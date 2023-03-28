@@ -60,9 +60,9 @@ type Server struct {
 
 	rpcChan chan IncomingRPCMsg
 
-	errChan  chan<- error
-	stopChan chan struct{}
-	wg       sync.WaitGroup
+	errorChan chan<- error
+	stopChan  chan struct{}
+	wg        sync.WaitGroup
 }
 
 func NewServer(cfg ServerCfg) (*Server, error) {
@@ -124,10 +124,10 @@ func NewServer(cfg ServerCfg) (*Server, error) {
 	return s, nil
 }
 
-func (s *Server) Start(errChan chan<- error) error {
-	s.Log.Info("starting")
+func (s *Server) Start(errorChan chan<- error) error {
+	s.Log.Debug(1, "starting")
 
-	s.errChan = errChan
+	s.errorChan = errorChan
 
 	// Persistent store
 	if err := s.persistentStore.Open(); err != nil {
@@ -164,18 +164,18 @@ func (s *Server) Start(errChan chan<- error) error {
 	s.wg.Add(1)
 	go s.main()
 
-	s.Log.Info("started")
+	s.Log.Debug(1, "started")
 
 	return nil
 }
 
 func (s *Server) Stop() {
-	s.Log.Info("stopping")
+	s.Log.Debug(1, "stopping")
 
 	close(s.stopChan)
 	s.wg.Wait()
 
-	s.Log.Info("stopped")
+	s.Log.Debug(1, "stopped")
 }
 
 func (s *Server) main() {
@@ -187,7 +187,7 @@ func (s *Server) main() {
 			trace := StackTrace(10)
 			s.Log.Error("panic: %s\n%s", msg, trace)
 
-			s.errChan <- fmt.Errorf("panic: %s", msg)
+			s.errorChan <- fmt.Errorf("panic: %s", msg)
 			s.shutdown()
 		}
 	}()
@@ -211,7 +211,7 @@ func (s *Server) main() {
 }
 
 func (s *Server) shutdown() {
-	s.Log.Info("shutting down")
+	s.Log.Debug(1, "shutting down")
 
 	s.stopHTTPServer()
 

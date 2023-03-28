@@ -1,8 +1,8 @@
 package raft
 
-type ServerId string
+type ServerId = string
 
-type ServerAddress string
+type ServerAddress = string
 
 type ServerSet map[ServerId]ServerData
 

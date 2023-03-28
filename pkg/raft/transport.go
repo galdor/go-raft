@@ -36,7 +36,7 @@ func newHTTPClient() *http.Client {
 }
 
 func (s *Server) startHTTPServer() error {
-	listener, err := net.Listen("tcp", string(s.LocalAddress))
+	listener, err := net.Listen("tcp", s.LocalAddress)
 	if err != nil {
 		return fmt.Errorf("cannot listen on %s: %w", s.LocalAddress, err)
 	}
@@ -44,7 +44,7 @@ func (s *Server) startHTTPServer() error {
 	s.Log.Info("listening on %s", s.LocalAddress)
 
 	s.httpServer = &http.Server{
-		Addr:              string(s.LocalAddress),
+		Addr:              s.LocalAddress,
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      5 * time.Second,
 		IdleTimeout:       60 * time.Second,
@@ -61,7 +61,7 @@ func (s *Server) startHTTPServer() error {
 		}()
 
 		if err := s.httpServer.Serve(listener); err != http.ErrServerClosed {
-			s.errChan <- fmt.Errorf("server error: %w", err)
+			s.errorChan <- fmt.Errorf("server error: %w", err)
 			return
 		}
 	}()
