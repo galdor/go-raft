@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/exograd/go-program"
+	jsonvalidator "github.com/galdor/go-json-validator"
+	"github.com/galdor/go-log"
+	"github.com/galdor/go-program"
 	"github.com/galdor/go-raft/pkg/raft"
-	"github.com/galdor/go-service/pkg/log"
 	"github.com/galdor/go-service/pkg/service"
-	"github.com/galdor/go-service/pkg/sjson"
 )
 
 type ServiceCfg struct {
@@ -28,19 +28,19 @@ type Service struct {
 	raftServer *raft.Server
 }
 
-func (cfg *ServiceCfg) ValidateJSON(v *sjson.Validator) {
+func (cfg *ServiceCfg) ValidateJSON(v *jsonvalidator.Validator) {
 	v.CheckObject("service", &cfg.Service)
 
 	v.CheckObject("raft", &cfg.Raft)
 }
 
-func (cfg *RaftCfg) ValidateJSON(v *sjson.Validator) {
-	v.Push("servers")
-	for _, server := range cfg.Servers {
-		v.CheckStringNotEmpty("localAddress", server.LocalAddress)
-		v.CheckStringNotEmpty("publicAddress", server.PublicAddress)
-	}
-	v.Pop()
+func (cfg *RaftCfg) ValidateJSON(v *jsonvalidator.Validator) {
+	v.WithChild("servers", func() {
+		for _, server := range cfg.Servers {
+			v.CheckStringNotEmpty("localAddress", server.LocalAddress)
+			v.CheckStringNotEmpty("publicAddress", server.PublicAddress)
+		}
+	})
 
 	v.CheckStringNotEmpty("dataDirectory", cfg.DataDirectory)
 }
