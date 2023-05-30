@@ -1,9 +1,12 @@
 package raft
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"math/rand"
 	"net/http"
+	"os"
 	"path"
 	"sync"
 	"time"
@@ -97,14 +100,6 @@ func NewServer(cfg ServerCfg) (*Server, error) {
 
 	randSource := rand.NewSource(time.Now().UnixNano())
 
-	dataDirectory := path.Join(cfg.DataDirectory, cfg.Id)
-
-	persistentStorePath := path.Join(dataDirectory, "persistent-state.json")
-	persistentStore := NewPersistentStore(persistentStorePath)
-
-	logStorePath := path.Join(dataDirectory, "log.data")
-	logStore := NewLogStore(logStorePath)
-
 	s := &Server{
 		Cfg: cfg,
 		Log: cfg.Logger,
@@ -113,9 +108,6 @@ func NewServer(cfg ServerCfg) (*Server, error) {
 		LocalAddress:  sdata.LocalAddress,
 		PublicAddress: sdata.PublicAddress,
 
-		persistentStore: persistentStore,
-		logStore:        logStore,
-
 		randGenerator: rand.New(randSource),
 
 		rpcChan: make(chan IncomingRPCMsg),
@@ -123,13 +115,35 @@ func NewServer(cfg ServerCfg) (*Server, error) {
 		stopChan: make(chan struct{}),
 	}
 
+	dataDirectory := s.DataDirectoryPath()
+
+	persistentStorePath := path.Join(dataDirectory, "persistent-state.json")
+	s.persistentStore = NewPersistentStore(persistentStorePath)
+
+	logStorePath := path.Join(dataDirectory, "log.data")
+	s.logStore = NewLogStore(logStorePath)
+
 	return s, nil
+}
+
+func (s *Server) DataDirectoryPath() string {
+	return path.Join(s.Cfg.DataDirectory, s.Cfg.Id)
 }
 
 func (s *Server) Start(errorChan chan<- error) error {
 	s.Log.Debug(1, "starting")
 
 	s.errorChan = errorChan
+
+	// Data directory
+	dataDirectoryPath := s.DataDirectoryPath()
+
+	if err := os.MkdirAll(dataDirectoryPath, 0755); err != nil {
+		if !errors.Is(err, fs.ErrExist) {
+			return fmt.Errorf("cannot create directory %q: %w",
+				dataDirectoryPath, err)
+		}
+	}
 
 	// Persistent store
 	s.Log.Debug(1, "loading persistent store from %q",
