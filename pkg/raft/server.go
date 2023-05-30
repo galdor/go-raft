@@ -24,6 +24,8 @@ type ServerCfg struct {
 	MaxElectionTimeout time.Duration
 
 	HeartbeatInterval time.Duration
+
+	LogReplayFunc LogReplayFunc
 }
 
 type Server struct {
@@ -163,7 +165,7 @@ func (s *Server) Start(errorChan chan<- error) error {
 	// Log store
 	s.Log.Debug(1, "loading log store from %q", s.logStore.filePath)
 
-	if err := s.logStore.Open(nil); err != nil {
+	if err := s.logStore.Open(s.Cfg.LogReplayFunc); err != nil {
 		return fmt.Errorf("cannot open log store: %w", err)
 	}
 

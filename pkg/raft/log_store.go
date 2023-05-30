@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+type LogReplayFunc func(*LogEntry) error
+
 type LogStore struct {
 	filePath string
 	file     *os.File
@@ -23,7 +25,7 @@ func NewLogStore(filePath string) *LogStore {
 	}
 }
 
-func (s *LogStore) Open(replayFn func(*LogEntry) error) error {
+func (s *LogStore) Open(replayFn LogReplayFunc) error {
 	flags := os.O_RDWR | os.O_CREATE
 	file, err := os.OpenFile(s.filePath, flags, 0600)
 	if err != nil {
