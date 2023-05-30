@@ -6,10 +6,11 @@ require (
 	github.com/galdor/go-json-validator v0.0.0-20230516142654-c9a3bb38ec11
 	github.com/galdor/go-log v0.0.0-20230430112134-7f0743aaa8a4
 	github.com/galdor/go-program v0.0.0-20230403162644-22adfbe9fbab
-	github.com/galdor/go-service v0.0.0-20230516150018-52fd83c6d5ba
+	github.com/galdor/go-service v0.0.0-20230530141950-e5c9c16a145f
 )
 
 require (
+	github.com/galdor/go-ejson v0.0.0-20230529130336-c90232eb86a2 // indirect
 	github.com/galdor/go-json-pointer v0.0.0-20230507182255-fb96822bc674 // indirect
 	github.com/galdor/go-uuid v0.0.0-20230407141709-ff0a499e205e // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

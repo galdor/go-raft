@@ -1,5 +1,7 @@
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
+github.com/galdor/go-ejson v0.0.0-20230529130336-c90232eb86a2 h1:dNJeeDoszur5GQAmpXakGZcvZqZOwc2clYyh3JNVt/8=
+github.com/galdor/go-ejson v0.0.0-20230529130336-c90232eb86a2/go.mod h1:KM+LPUqsRBfQQmoh/3lV8ndwUa1JxSsXJz/BRv7XN3Y=
 github.com/galdor/go-json-pointer v0.0.0-20230507182255-fb96822bc674 h1:WwsdzU10XrCKIY/ouMTdpFOMfejkeWNP1N5845DH7+Q=
 github.com/galdor/go-json-pointer v0.0.0-20230507182255-fb96822bc674/go.mod h1:DIqkzx3fQxSrx9JTKowUflyg+qGwfMU3VxYnS88r6hg=
 github.com/galdor/go-json-validator v0.0.0-20230516142654-c9a3bb38ec11 h1:PCHFKDeGS2iCY/5xqZ7NV89wWqQGnMp0jIw0sWLLYek=
@@ -8,8 +10,8 @@ github.com/galdor/go-log v0.0.0-20230430112134-7f0743aaa8a4 h1:4wgvzK0SCjEhcNkcI
 github.com/galdor/go-log v0.0.0-20230430112134-7f0743aaa8a4/go.mod h1:R6YFiHlngxF96nawrfe/P2/lBiv2lTZJHdy+HCF6idk=
 github.com/galdor/go-program v0.0.0-20230403162644-22adfbe9fbab h1:czJoR/JfIjVSCadg2h9Br4AmcdWfwfbgeArAJKTdWMY=
 github.com/galdor/go-program v0.0.0-20230403162644-22adfbe9fbab/go.mod h1:KnVdVzlic6wXk1wARM0MRJ2xviiZKgNA02bBjb8yTtc=
-github.com/galdor/go-service v0.0.0-20230516150018-52fd83c6d5ba h1:4/U/iLE2IVLkPe69SYuxsBid+vFfzwOR//cE7fkxHdQ=
-github.com/galdor/go-service v0.0.0-20230516150018-52fd83c6d5ba/go.mod h1:2tggSwcaPFT5kA3y5N0Z1Mh+QTUmg6q28gbIl4CD7is=
+github.com/galdor/go-service v0.0.0-20230530141950-e5c9c16a145f h1:iE8NkFbGxUw0r0XLGvL7VrtNIRvBTupd+1Lk7NSiqEo=
+github.com/galdor/go-service v0.0.0-20230530141950-e5c9c16a145f/go.mod h1:/orvJ0hOxn72eRu60Wk+NB3M83uftqVHlByJfJ7U+qU=
 github.com/galdor/go-uuid v0.0.0-20230407141709-ff0a499e205e h1:QT1GpVfyc3NoA3sfqzy0h9TToTBVEjWeXmeBuvLNBGE=
 github.com/galdor/go-uuid v0.0.0-20230407141709-ff0a499e205e/go.mod h1:IsTvYf6zc1cSS4IzlFOuBSP4preSKoB73uGgx98kMjg=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
@@ -30,7 +32,7 @@ github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZV
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
+github.com/stretchr/testify v1.8.3 h1:RP3t2pwF7cMEbC1dqtB6poj3niw/9gnV4Cjg5oW5gtY=
 golang.org/x/crypto v0.6.0 h1:qfktjS5LUO+fFKeJXZ+ikTRijMmljikvG68fpMMruSc=
 golang.org/x/crypto v0.6.0/go.mod h1:OFC/31mSvZgRz0V1QTNCzfAI1aIRzbiufJtkMIlEp58=
 golang.org/x/sync v0.1.0 h1:wsuoTGHzEhffawBOhz5CYhcrV4IdKZbEyZjBMuTp12o=

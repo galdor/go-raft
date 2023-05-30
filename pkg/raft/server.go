@@ -97,10 +97,12 @@ func NewServer(cfg ServerCfg) (*Server, error) {
 
 	randSource := rand.NewSource(time.Now().UnixNano())
 
-	persistentStorePath := path.Join(cfg.DataDirectory, "persistent-state.json")
+	dataDirectory := path.Join(cfg.DataDirectory, cfg.Id)
+
+	persistentStorePath := path.Join(dataDirectory, "persistent-state.json")
 	persistentStore := NewPersistentStore(persistentStorePath)
 
-	logStorePath := path.Join(cfg.DataDirectory, "log.data")
+	logStorePath := path.Join(dataDirectory, "log.data")
 	logStore := NewLogStore(logStorePath)
 
 	s := &Server{
@@ -130,6 +132,9 @@ func (s *Server) Start(errorChan chan<- error) error {
 	s.errorChan = errorChan
 
 	// Persistent store
+	s.Log.Debug(1, "loading persistent store from %q",
+		s.persistentStore.filePath)
+
 	if err := s.persistentStore.Open(); err != nil {
 		return fmt.Errorf("cannot open persistent persistentStore: %w", err)
 	}
@@ -142,6 +147,8 @@ func (s *Server) Start(errorChan chan<- error) error {
 		s.persistentState.CurrentTerm, s.persistentState.VotedFor)
 
 	// Log store
+	s.Log.Debug(1, "loading log store from %q", s.logStore.filePath)
+
 	if err := s.logStore.Open(nil); err != nil {
 		return fmt.Errorf("cannot open log store: %w", err)
 	}
