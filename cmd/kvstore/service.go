@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"net"
 
 	jsonvalidator "github.com/galdor/go-json-validator"
 	"github.com/galdor/go-log"
 	"github.com/galdor/go-program"
 	"github.com/galdor/go-raft/pkg/raft"
 	"github.com/galdor/go-service/pkg/service"
+	"github.com/galdor/go-service/pkg/shttp"
 )
 
 type ServiceCfg struct {
@@ -22,9 +24,11 @@ type RaftCfg struct {
 
 type Service struct {
 	Cfg     ServiceCfg
+	Program *program.Program
 	Service *service.Service
 	Log     *log.Logger
 
+	apiServer  *APIServer
 	raftServer *raft.Server
 }
 
@@ -49,43 +53,79 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (e *Service) InitProgram(p *program.Program) {
+func (s *Service) InitProgram(p *program.Program) {
+	s.Program = p
+
 	p.AddArgument("id", "the server identifier")
 }
 
-func (e *Service) DefaultCfg() interface{} {
-	return &e.Cfg
+func (s *Service) DefaultCfg() interface{} {
+	return &s.Cfg
 }
 
-func (e *Service) ValidateCfg() error {
+func (s *Service) ValidateCfg() error {
 	return nil
 }
 
-func (e *Service) ServiceCfg() *service.ServiceCfg {
-	return &e.Cfg.Service
+func (s *Service) ServiceCfg() *service.ServiceCfg {
+	cfg := &s.Cfg.Service
+
+	instanceId := s.Program.ArgumentValue("id")
+
+	if cfg.HTTPServers == nil {
+		cfg.HTTPServers = make(map[string]*shttp.ServerCfg)
+	}
+
+	raftServerCfg := s.Cfg.Raft.Servers[instanceId]
+	host, _, _ := net.SplitHostPort(raftServerCfg.LocalAddress)
+
+	cfg.HTTPServers["api"] = &shttp.ServerCfg{
+		Address:               net.JoinHostPort(host, "8081"),
+		LogSuccessfulRequests: true,
+		ErrorHandler:          shttp.JSONErrorHandler,
+	}
+
+	return cfg
 }
 
-func (e *Service) Init(s *service.Service) error {
-	e.Service = s
-	e.Log = s.Log
+func (s *Service) Init(ss *service.Service) error {
+	s.Service = ss
+	s.Log = ss.Log
 
-	if err := e.initRaftServer(); err != nil {
+	if err := s.initAPIServer(); err != nil {
+		return err
+	}
+
+	if err := s.initRaftServer(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (e *Service) initRaftServer() error {
-	instanceId := e.Service.Program.ArgumentValue("id")
+func (s *Service) initAPIServer() error {
+	api, err := NewAPIServer(s)
+	if err != nil {
+		return fmt.Errorf("cannot create api server: %w", err)
+	}
 
-	logger := e.Log.Child("raft", nil)
+	s.apiServer = api
+
+	return nil
+}
+
+func (s *Service) initRaftServer() error {
+	instanceId := s.Service.Program.ArgumentValue("id")
+
+	logger := s.Log.Child("raft", log.Data{
+		"instance": instanceId,
+	})
 
 	serverCfg := raft.ServerCfg{
 		Id:      instanceId,
-		Servers: e.Cfg.Raft.Servers,
+		Servers: s.Cfg.Raft.Servers,
 
-		DataDirectory: e.Cfg.Raft.DataDirectory,
+		DataDirectory: s.Cfg.Raft.DataDirectory,
 
 		Logger: logger,
 	}
@@ -95,22 +135,26 @@ func (e *Service) initRaftServer() error {
 		return fmt.Errorf("cannot create raft server: %w", err)
 	}
 
-	e.raftServer = server
+	s.raftServer = server
 
 	return nil
 }
 
-func (e *Service) Start(s *service.Service) error {
-	if err := e.raftServer.Start(s.ErrorChan()); err != nil {
+func (s *Service) Start(ss *service.Service) error {
+	if err := s.apiServer.Init(); err != nil {
+		return fmt.Errorf("cannot initialize api server: %w", err)
+	}
+
+	if err := s.raftServer.Start(ss.ErrorChan()); err != nil {
 		return fmt.Errorf("cannot start raft server: %w", err)
 	}
 
 	return nil
 }
 
-func (e *Service) Stop(s *service.Service) {
-	e.raftServer.Stop()
+func (s *Service) Stop(ss *service.Service) {
+	s.raftServer.Stop()
 }
 
-func (e *Service) Terminate(s *service.Service) {
+func (s *Service) Terminate(ss *service.Service) {
 }

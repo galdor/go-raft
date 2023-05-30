@@ -6,7 +6,7 @@ require (
 	github.com/galdor/go-json-validator v0.0.0-20230516142654-c9a3bb38ec11
 	github.com/galdor/go-log v0.0.0-20230430112134-7f0743aaa8a4
 	github.com/galdor/go-program v0.0.0-20230403162644-22adfbe9fbab
-	github.com/galdor/go-service v0.0.0-20230530141950-e5c9c16a145f
+	github.com/galdor/go-service v0.0.0-20230530155757-3a547cf551a7
 )
 
 require (

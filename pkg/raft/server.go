@@ -171,7 +171,6 @@ func (s *Server) Start(errorChan chan<- error) error {
 	if err := s.startHTTPServer(); err != nil {
 		return fmt.Errorf("cannot start http server: %w", err)
 	}
-	s.Log.Info("listening on %s", s.LocalAddress)
 
 	s.httpClient = newHTTPClient()
 
