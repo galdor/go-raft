@@ -136,7 +136,7 @@ func (s *Server) Start(errorChan chan<- error) error {
 		s.persistentStore.filePath)
 
 	if err := s.persistentStore.Open(); err != nil {
-		return fmt.Errorf("cannot open persistent persistentStore: %w", err)
+		return fmt.Errorf("cannot open persistent store: %w", err)
 	}
 
 	if err := s.persistentStore.Read(&s.persistentState); err != nil {
