@@ -28,8 +28,9 @@ type Service struct {
 	Service *service.Service
 	Log     *log.Logger
 
-	apiServer  *APIServer
+	store      *Store
 	raftServer *raft.Server
+	apiServer  *APIServer
 }
 
 func (cfg *ServiceCfg) ValidateJSON(v *jsonvalidator.Validator) {
@@ -92,24 +93,15 @@ func (s *Service) Init(ss *service.Service) error {
 	s.Service = ss
 	s.Log = ss.Log
 
-	if err := s.initAPIServer(); err != nil {
-		return err
-	}
+	s.store = NewStore()
 
 	if err := s.initRaftServer(); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (s *Service) initAPIServer() error {
-	api, err := NewAPIServer(s)
-	if err != nil {
-		return fmt.Errorf("cannot create api server: %w", err)
+	if err := s.initAPIServer(); err != nil {
+		return err
 	}
-
-	s.apiServer = api
 
 	return nil
 }
@@ -140,13 +132,24 @@ func (s *Service) initRaftServer() error {
 	return nil
 }
 
-func (s *Service) Start(ss *service.Service) error {
-	if err := s.apiServer.Init(); err != nil {
-		return fmt.Errorf("cannot initialize api server: %w", err)
+func (s *Service) initAPIServer() error {
+	api, err := NewAPIServer(s)
+	if err != nil {
+		return fmt.Errorf("cannot create api server: %w", err)
 	}
 
+	s.apiServer = api
+
+	return nil
+}
+
+func (s *Service) Start(ss *service.Service) error {
 	if err := s.raftServer.Start(ss.ErrorChan()); err != nil {
 		return fmt.Errorf("cannot start raft server: %w", err)
+	}
+
+	if err := s.apiServer.Init(); err != nil {
+		return fmt.Errorf("cannot initialize api server: %w", err)
 	}
 
 	return nil
