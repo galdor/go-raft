@@ -120,6 +120,8 @@ func (s *Service) initRaftServer() error {
 		DataDirectory: s.Cfg.Raft.DataDirectory,
 
 		Logger: logger,
+
+		LogReplayFunc: s.replayLogEntry,
 	}
 
 	server, err := raft.NewServer(serverCfg)
@@ -160,4 +162,15 @@ func (s *Service) Stop(ss *service.Service) {
 }
 
 func (s *Service) Terminate(ss *service.Service) {
+}
+
+func (s *Service) replayLogEntry(entry *raft.LogEntry) error {
+	op, err := DecodeOp(entry.Data)
+	if err != nil {
+		return fmt.Errorf("cannot decode op: %w", err)
+	}
+
+	s.store.ApplyOp(op)
+
+	return nil
 }

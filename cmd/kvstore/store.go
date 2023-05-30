@@ -1,11 +1,14 @@
 package main
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Store struct {
 	Entries map[string]string
 
-	mu sync.RWMutex
+	mu sync.Mutex
 }
 
 func NewStore() *Store {
@@ -16,22 +19,33 @@ func NewStore() *Store {
 	return &s
 }
 
-func (s *Store) Get(key string) (string, bool) {
-	s.mu.RLock()
-	value, found := s.Entries[key]
-	s.mu.RUnlock()
+func (s *Store) ApplyOp(vop Op) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
+	switch op := vop.(type) {
+	case *OpPut:
+		s.putEntry(op.Key, op.Value)
+
+	case *OpDelete:
+		s.deleteEntry(op.Key)
+
+	default:
+		return fmt.Errorf("unhandled op %#v", vop)
+	}
+
+	return nil
+}
+
+func (s *Store) getEntry(key string) (string, bool) {
+	value, found := s.Entries[key]
 	return value, found
 }
 
-func (s *Store) Put(key, value string) {
-	s.mu.Lock()
+func (s *Store) putEntry(key, value string) {
 	s.Entries[key] = value
-	s.mu.Unlock()
 }
 
-func (s *Store) Delete(key string) {
-	s.mu.Lock()
+func (s *Store) deleteEntry(key string) {
 	delete(s.Entries, key)
-	s.mu.Unlock()
 }
