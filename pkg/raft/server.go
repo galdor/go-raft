@@ -248,12 +248,15 @@ func (s *Server) onHeartbeatTicker() {
 		return
 	}
 
+	// We're not adding any entry, so prevLogIndex and prevLogTerm are the
+	// last one in the log store.
+
 	s.broadcastMsg(&RPCAppendEntriesRequest{
 		Term:         s.persistentState.CurrentTerm,
 		LeaderId:     s.Id,
-		PrevLogIndex: 0, // TODO
-		PrevLogTerm:  0, // TODO
-		LeaderCommit: 0, // TODO
+		PrevLogIndex: s.logStore.lastIndex,
+		PrevLogTerm:  s.logStore.lastTerm,
+		LeaderCommit: s.commitIndex,
 	})
 }
 
