@@ -76,19 +76,21 @@ func (s *Server) stopHTTPServer() {
 	s.httpServer.Shutdown(ctx)
 }
 
-func (s *Server) sendMsg(recipientId ServerId, msg RPCMsg) error {
+func (s *Server) sendMsg(recipientId ServerId, msg RPCMsg) {
 	s.Log.Debug(2, "sending %v to %s", msg, recipientId)
 
 	// Encode the message
 	msgData, err := EncodeRPCMsg(msg)
 	if err != nil {
-		return fmt.Errorf("cannot encode message: %w", err)
+		s.Log.Error("cannot encode message: %v", err)
+		return
 	}
 
 	// Obtain the address of the recipient
 	recipient, found := s.Cfg.Servers[recipientId]
 	if !found {
-		return fmt.Errorf("unknown recipient id %q", recipientId)
+		s.Log.Error("unknown recipient id %q", recipientId)
+		return
 	}
 
 	address := recipient.PublicAddress
@@ -101,15 +103,14 @@ func (s *Server) sendMsg(recipientId ServerId, msg RPCMsg) error {
 
 	req, err := http.NewRequest("POST", uri.String(), bytes.NewReader(msgData))
 	if err != nil {
-		return fmt.Errorf("cannot create http request: %w", err)
+		s.Log.Error("cannot create http request: %v", err)
+		return
 	}
 
 	req.Header.Set("X-Raft-Source-Id", string(s.Id))
 
 	// Send the request asynchronously to avoid blocking the server
 	go s.sendMsgRequest(address, msg, req)
-
-	return nil
 }
 
 func (s *Server) sendMsgRequest(address ServerAddress, msg RPCMsg, req *http.Request) {
