@@ -7,8 +7,8 @@ type ServerAddress = string
 type ServerSet map[ServerId]ServerData
 
 type ServerData struct {
-	LocalAddress  ServerAddress `json:"localAddress"`
-	PublicAddress ServerAddress `json:"publicAddress"`
+	LocalAddress  ServerAddress `json:"local_address"`
+	PublicAddress ServerAddress `json:"public_address"`
 }
 
 type ServerState string

@@ -19,7 +19,7 @@ type ServiceCfg struct {
 
 type RaftCfg struct {
 	Servers       raft.ServerSet `json:"servers"`
-	DataDirectory string         `json:"dataDirectory"`
+	DataDirectory string         `json:"data_directory"`
 }
 
 type Service struct {
@@ -42,12 +42,12 @@ func (cfg *ServiceCfg) ValidateJSON(v *jsonvalidator.Validator) {
 func (cfg *RaftCfg) ValidateJSON(v *jsonvalidator.Validator) {
 	v.WithChild("servers", func() {
 		for _, server := range cfg.Servers {
-			v.CheckStringNotEmpty("localAddress", server.LocalAddress)
-			v.CheckStringNotEmpty("publicAddress", server.PublicAddress)
+			v.CheckStringNotEmpty("local_address", server.LocalAddress)
+			v.CheckStringNotEmpty("public_address", server.PublicAddress)
 		}
 	})
 
-	v.CheckStringNotEmpty("dataDirectory", cfg.DataDirectory)
+	v.CheckStringNotEmpty("data_directory", cfg.DataDirectory)
 }
 
 func NewService() *Service {

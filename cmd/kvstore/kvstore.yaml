@@ -1,21 +1,21 @@
 service:
   logger:
-    backendType: "terminal"
-    terminalBackend:
+    backend_type: "terminal"
+    terminal_backend:
       color: true
-      forceColor: true
+      force_color: true
 
-  dataDirectory: "cmd/kvstore/data"
+  data_directory: "cmd/kvstore/data"
 
 raft:
   servers:
     i1:
-      localAddress:  "127.0.42.1:8042"
-      publicAddress: "127.0.42.1:8042"
+      local_address:  "127.0.42.1:8042"
+      public_address: "127.0.42.1:8042"
     i2:
-      localAddress:  "127.0.42.2:8042"
-      publicAddress: "127.0.42.2:8042"
+      local_address:  "127.0.42.2:8042"
+      public_address: "127.0.42.2:8042"
     i3:
-      localAddress:  "127.0.42.3:8042"
-      publicAddress: "127.0.42.3:8042"
-  dataDirectory: "cmd/kvstore/data/raft"
+      local_address:  "127.0.42.3:8042"
+      public_address: "127.0.42.3:8042"
+  data_directory: "cmd/kvstore/data/raft"
