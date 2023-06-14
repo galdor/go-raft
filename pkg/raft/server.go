@@ -402,6 +402,16 @@ func (s *Server) onRPCAppendEntriesRequest(sourceId ServerId, req *RPCAppendEntr
 		}
 	}
 
+	// Reject entries from previous terms
+	if req.Term < s.persistentState.CurrentTerm {
+		s.sendMsg(sourceId, &RPCAppendEntriesResponse{
+			Term:    s.persistentState.CurrentTerm,
+			Success: false,
+		})
+
+		return
+	}
+
 	// TODO
 }
 
